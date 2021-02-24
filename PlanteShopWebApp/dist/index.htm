@@ -1,0 +1,148 @@
+<!--Når web app'en skal op på azure oprettes en web service og når den er oprettet gå til resourcen -> og find deployment 
+center i venstre side, find så FTP -> dashboard og brug FTPS Endpoint som vært i Filezilla, Username som brugernavn og Password 
+som adgangskode. find mappen med web projektet og kopier den placering ind i filezilla "lokalt sted" og find dist mappen -> 
+kopier indholdet ind i wwwroot (fjernstedet) husk at omdøbe index til hostingstart.html og slet den oprindelige hostingstart,html-->
+
+
+<!doctype html>
+<html lang="en-US">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+                    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+                    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+                    <title>PlanteShop</title>
+                </head>
+
+                <body>
+                    <div class="jumbotron">
+                        <h1>Velkommen til PlanteShoppen</h1>
+                    </div>
+
+                    <div id="app">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4>Hent Alle Planter</h4>
+                            </div>
+                            <div class="panel-body">
+                                <button id="HentPlanter" class="btn btn-primary" v-on:click="getAllPlanter()">Hent Planter</button>
+                                <button class="btn btn-warning" v-on:click="clearList()">clear</button>
+                                <br/>
+                                <ul v-if="planteListe.length > 0">
+                                    <li id="planteListeOutput" v-for="plante in planteListe">
+                                        Plante ID:
+                                        {{plante.planteId}}
+                                        PlanteType:
+                                        {{plante.planteType }}
+                                        Plante Navn:
+                                        {{plante.planteNavn}}
+                                        Pris:
+                                        {{plante.pris}}
+                                        Max Højde:
+                                        {{plante.maksHoejde}}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4>Hent Plante med Id</h4>
+                            </div>
+                            <div class="panel-body">
+                                <input id="planteByIdInput" type="number" class="form-control" v-model.number="planteById" placeholder="Plante ID ..."/><br/>
+                                <button id="findPlanteId" class="btn btn-primary" v-on:click="getPlanteById(planteById)">Hent Plante</button>
+                                <button class="btn btn-warning" v-on:click="clearPlanteId">Clear</button>
+                                <div id="planteIdOutput" class="panel-body" v-if="singlePlanteId != null">
+                                    Plante ID:
+                                    {{singlePlanteId.planteId}}
+                                    PlanteType:
+                                    {{singlePlanteId.planteType }}
+                                    Plante Navn:
+                                    {{singlePlanteId.planteNavn}}
+                                    Pris:
+                                    {{singlePlanteId.pris}}
+                                    Max Højde:
+                                    {{singlePlanteId.maksHoejde}}
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4>Hent Plante med Type</h4>
+                            </div>
+                            <div class="panel-body">
+                                <input id="planteByTypeInput" type="text" class="form-control" v-model="planteType" placeholder="Plante Type ..."/><br/>
+                                <button id="findPlanteType" class="btn btn-primary" v-on:click="getPlanteByType(planteType)">Hent Plante Type</button>
+                                <button class="btn btn-warning" v-on:click="clearPlanteType">Clear</button>
+                                <div class="panel-body">
+                                    <ul v-if="singlePlanteType.length > 0">
+                                        <li id="planteTypeListe" v-for="plante in singlePlanteType">
+                                            Plante ID:
+                                            {{plante.planteId}}
+                                            PlanteType:
+                                            {{plante.planteType}}
+                                            Plante Navn:
+                                            {{plante.planteNavn}}
+                                            Pris:
+                                            {{plante.pris}}
+                                            Max Højde:
+                                            {{plante.maksHoejde}}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4>Opret en Plante</h4>
+                            </div>
+                            <div class="panel-body">
+                                <form class="form-inline" id="planteInputForm" v-on:submit.prevent="addPlante">
+                                    <div
+                                        class="form-group">
+                                        <!--<input type="number" class="form-control" v-model.number="formData.planteId" placeholder="Plante Id ...">-->
+                                        <input id="planteTypeInput" type="text" class="form-control" v-model="formData.planteType" placeholder="Plante Type ..."/>
+                                        <input id="planteNavnInput" type="text" class="form-control" v-model="formData.planteNavn" placeholder="Plante Navn ..."/>
+                                        <input id="plantePrisInput" type="number" class="form-control" v-model.number="formData.pris" placeholder="Pris ..."/>
+                                        <input id="planteHoejdeInput" type="number" class="form-control" v-model.number="formData.maksHoejde" placeholder="Maks Højde..."/>
+                                    </div>
+                                    <button id="tilfoejPlante" class="btn btn-primary">Send</button>
+                                </form>
+                                <br/>
+
+                                <button class="btn btn-warning" v-on:click="clearOutput()">Clear</button><br/><br/>
+                                <div class="panel-body">{{addMessage}}</div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h4>Slet Plante med Id</h4>
+                            </div>
+                            <div class="panel-body">
+                                <input id="planteDeleteIdInput" type="number" class="form-control" v-model.number="planteId" placeholder="Plante ID ..."/><br/>
+                                <button id="deletePlanteId" class="btn btn-primary" v-on:click="deletePlanteById(planteId)">Slet Plante</button>
+                                <button class="btn btn-warning" v-on:click="clearDeletePlante">Clear</button>
+                                <div class="panel-body" v-if="deleteMessage != null ">{{deleteMessage}}</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script src="bundle.js"></script>
+                </body>
+
+            </html>
